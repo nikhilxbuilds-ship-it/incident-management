@@ -4,6 +4,7 @@ interface IOrganization extends Document {
     name : string,
     slug : string,
     createdAt : Date
+    updatedAt: Date;
 }
 
 const organizationSchema = new Schema<IOrganization>(
