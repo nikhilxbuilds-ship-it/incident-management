@@ -1,42 +1,40 @@
+
 import mongoose, { Schema, Document } from "mongoose";
 
+export type UserRole = "owner" | "admin" | "employee";
+
 interface IUser extends Document {
-  employeeId: String;
-  name: String;
-  email: String;
-  passwordHash: string;
+  name: string;
+  email: string;
+  password: string;
   organizationId: mongoose.Types.ObjectId;
-  role: "OWNER" | "ADMIN" | "EMPLOYEE";
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const userSchema = new Schema<IUser>({
-  employeeId: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+const userSchema = new Schema<IUser>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
 
-  email: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true,
-  },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
 
-  passwordHash: {
-    type: String,
-    required: true,
-  },
-
-  organizationId: {
+    organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
       required: true,
@@ -44,7 +42,22 @@ const userSchema = new Schema<IUser>({
 
     role: {
       type: String,
-      enum: ["OWNER", "ADMIN", "EMPLOYEE"],
+      enum: ["owner", "admin", "employee"],
+      default: "employee",
       required: true,
     },
-});
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// An email must be unique within its organization.
+userSchema.index(
+  { organizationId: 1, email: 1 },
+  { unique: true }
+);
+
+const User = mongoose.model<IUser>("User", userSchema);
+
+export default User;
